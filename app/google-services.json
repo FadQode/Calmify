@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "733155549694",
+    "project_id": "calmify-c6427",
+    "storage_bucket": "calmify-c6427.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:733155549694:android:17c7af8014c6222d32e0af",
+        "android_client_info": {
+          "package_name": "com.example.calmify"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5BtG74m56ZBZP49fZWep6lW94lTbi7gs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

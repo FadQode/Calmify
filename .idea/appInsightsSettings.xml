@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.calmify" />
+                  <option name="mobileSdkAppId" value="1:733155549694:android:17c7af8014c6222d32e0af" />
+                  <option name="projectId" value="calmify-c6427" />
+                  <option name="projectNumber" value="733155549694" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

@@ -13,6 +13,9 @@
         android:theme="@style/Theme.Calmify"
         tools:targetApi="31">
         <activity
+            android:name=".views.SleepActivity"
+            android:exported="false" />
+        <activity
             android:name=".views.SignUpActivity"
             android:exported="false" />
         <activity

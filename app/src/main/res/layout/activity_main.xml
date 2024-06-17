@@ -73,154 +73,25 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@id/topNavigationBar"
-        app:layout_constraintBottom_toTopOf="@id/navigationBar"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigationView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/navigationBar"
-        android:layout_width="464dp"
-        android:layout_height="118dp"
-        android:background="@drawable/bg_nav"
-        android:gravity="center"
-        android:orientation="horizontal"
-
-        app:layout_constraintBottom_toBottomOf="parent"
+    <!-- Bottom Navigation View -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigationView"
+        android:layout_width="0dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="700dp"
+        android:background="?android:attr/windowBackground"
+        app:itemIconSize="40dp"
+        app:itemIconTint="@color/color"
+        app:itemTextColor="@color/color"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.509"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0">
-
-
-        <LinearLayout
-            android:id="@+id/linearLayout2"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="360dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/homeIcon"
-                android:layout_width="37dp"
-                android:layout_height="34dp"
-                android:contentDescription="Aktivitas"
-                android:src="@drawable/logo_home"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:layout_editor_absoluteX="70dp" />
-
-            <TextView
-                android:id="@+id/homeText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Home"
-                android:textColor="@android:color/black"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/linearLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="260dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/breatheIcon"
-                android:layout_width="37dp"
-                android:layout_height="34dp"
-                android:contentDescription=""
-                android:src="@drawable/logo_meditation"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:layout_editor_absoluteX="334dp" />
-
-            <TextView
-                android:id="@+id/breatheText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Meditate"
-                android:textColor="@android:color/black"
-                android:textSize="12sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/linearLayout3"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="160dp"
-            android:gravity="center"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/activityIcon"
-                android:layout_width="40dp"
-                android:layout_height="30dp"
-                android:contentDescription=""
-                android:src="@drawable/logo_activity"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:layout_editor_absoluteX="341dp" />
-
-            <TextView
-                android:id="@+id/activityText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Activity"
-                android:textColor="@android:color/black"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/linearLayout4"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:layout_marginEnd="60dp"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:layout_editor_absoluteX="332dp">
-
-            <ImageView
-                android:id="@+id/communityIcon"
-                android:layout_width="42dp"
-                android:layout_height="34dp"
-                android:contentDescription=""
-                android:src="@drawable/logo_community"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:layout_editor_absoluteX="371dp" />
-
-            <TextView
-                android:id="@+id/communityText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Community"
-                android:textColor="@android:color/black"
-                android:textSize="12sp" />
-        </LinearLayout>
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:menu="@menu/bottom_navigation_menu" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

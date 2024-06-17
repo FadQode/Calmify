@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@drawable/logo_home"
+        android:title="@string/home"
+        android:layout_width="42dp"
+        android:layout_height="34dp"/>
+    <item
+        android:id="@+id/navigation_meditate"
+        android:icon="@drawable/logo_meditation"
+        android:title="@string/meditate"
+        android:layout_width="42dp"
+        android:layout_height="34dp"
+        />
+    <item
+        android:id="@+id/navigation_activity"
+        android:icon="@drawable/logo_activity"
+        android:title="@string/activity"
+        android:layout_width="42dp"
+        android:layout_height="34dp"/>
+    <item
+        android:id="@+id/navigation_community"
+        android:icon="@drawable/logo_community"
+        android:title="@string/community"
+        android:layout_width="42dp"
+        android:layout_height="34dp"/>
+</menu>

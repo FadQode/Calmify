@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import com.example.calmify.R;
 import com.example.calmify.views.fragments.HomeFragment;
 import com.example.calmify.views.fragments.InProgressFragment;
+import com.example.calmify.views.fragments.MeditateFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
                 if (itemId == R.id.navigation_home) {
                     selectedFragment = new HomeFragment();
                 } else if (itemId == R.id.navigation_meditate) {
-                    selectedFragment = new InProgressFragment();
+                    selectedFragment = new MeditateFragment();
                 } else if (itemId == R.id.navigation_activity) {
                     selectedFragment = new InProgressFragment();
                 } else if (itemId == R.id.navigation_community) {
@@ -59,5 +60,13 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer); // Update with your fragment container id
+        if (fragment != null) {
+            fragment.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 }

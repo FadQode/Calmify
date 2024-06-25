@@ -34,12 +34,15 @@ import com.example.calmify.R;
 import java.text.MessageFormat;
 import java.util.Locale;
 
-
 public class SleepActivity extends AppCompatActivity {
 
     private static final String CHANNEL_ID = "SleepTimerChannel";
     private static final int NOTIFICATION_ID = 1;
-    private static final int PERMISSION_REQUEST_CODE = 100;
+    private static final String KEY_MILLISECOND_TIME = "millisecondTime";
+    private static final String KEY_START_TIME = "startTime";
+    private static final String KEY_TIME_BUFF = "timeBuff";
+    private static final String KEY_UPDATE_TIME = "updateTime";
+    private static final String KEY_TIMER_RUNNING = "timerRunning";
 
     TextView textView;
     WebView webView;
@@ -47,6 +50,8 @@ public class SleepActivity extends AppCompatActivity {
     int hours, seconds, minutes, milliSeconds;
     long millisecondTime, startTime, timeBuff, updateTime = 0L;
     Handler handler;
+    boolean timerRunning;
+
     private final Runnable runnable = new Runnable() {
         @Override
         public void run() {
@@ -82,6 +87,7 @@ public class SleepActivity extends AppCompatActivity {
                     Toast.makeText(SleepActivity.this, "Please enable the notification permission", Toast.LENGTH_SHORT).show();
                 }
             });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,6 +118,7 @@ public class SleepActivity extends AppCompatActivity {
             awake.setEnabled(true);
             webView.setVisibility(View.GONE);
             requestNotificationPermission();
+            timerRunning = true;
         });
 
         stop.setOnClickListener(view -> {
@@ -121,10 +128,11 @@ public class SleepActivity extends AppCompatActivity {
             stop.setEnabled(false);
             start.setEnabled(true);
             awake.setEnabled(false);
-            String url = "https://www.google.com/search?q=";
-            url += "how+to+sleep";
+            String url = "https://www.google.com/search?q=how+to+sleep";
             webView.setVisibility(View.VISIBLE);
             webView.loadUrl(url);
+            removeNotification();  // Remove notification when timer stops
+            timerRunning = false;
         });
 
         reset.setOnClickListener(view -> {
@@ -137,25 +145,82 @@ public class SleepActivity extends AppCompatActivity {
             minutes = 0;
             milliSeconds = 0;
             textView.setText("00:00:00:000");
-            removeNotification();
+            removeNotification();  // Remove notification when timer resets
+            timerRunning = false;
         });
 
         awake.setOnClickListener(v -> {
-
             timeBuff += millisecondTime;
             handler.removeCallbacks(runnable);
             reset.setEnabled(true);
             stop.setEnabled(false);
             start.setEnabled(true);
             awake.setEnabled(false);
-            String url = "https://www.google.com/search?q=";
-            url += "things+to+do+after+awake";
+            String url = "https://www.google.com/search?q=things+to+do+after+awake";
             webView.setVisibility(View.VISIBLE);
             webView.loadUrl(url);
-            removeNotification();
+            removeNotification();  // Remove notification when timer stops
+            timerRunning = false;
         });
 
-        textView.setText("00:00:00:000");
+        if (savedInstanceState != null) {
+            restoreInstanceState(savedInstanceState);
+        } else {
+            textView.setText("00:00:00:000");
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Ensure notification is not shown if the timer is not running
+        if (timerRunning) {
+            removeNotification();
+        }
+    }
+    protected void onStop() {
+        super.onStop();
+        // Ensure the notification is removed when the activity is stopped
+        removeNotification();
+        stopAllServices();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Remove notification when the activity is destroyed
+        removeNotification();
+        stopAllServices();
+    }
+
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong(KEY_MILLISECOND_TIME, millisecondTime);
+        outState.putLong(KEY_START_TIME, startTime);
+        outState.putLong(KEY_TIME_BUFF, timeBuff);
+        outState.putLong(KEY_UPDATE_TIME, updateTime);
+        outState.putBoolean(KEY_TIMER_RUNNING, timerRunning);
+    }
+
+
+    private void restoreInstanceState(Bundle savedInstanceState) {
+        millisecondTime = savedInstanceState.getLong(KEY_MILLISECOND_TIME);
+        startTime = savedInstanceState.getLong(KEY_START_TIME);
+        timeBuff = savedInstanceState.getLong(KEY_TIME_BUFF);
+        updateTime = savedInstanceState.getLong(KEY_UPDATE_TIME);
+        timerRunning = savedInstanceState.getBoolean(KEY_TIMER_RUNNING);
+        if (timerRunning) {
+            startTime = SystemClock.uptimeMillis() - millisecondTime;
+            handler.postDelayed(runnable, 0);
+            reset.setEnabled(false);
+            stop.setEnabled(true);
+            start.setEnabled(false);
+            awake.setEnabled(true);
+        } else {
+            updateTextView();
+        }
     }
 
     private void createNotificationChannel() {
@@ -181,17 +246,18 @@ public class SleepActivity extends AppCompatActivity {
                 requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS);
             }
         } else {
-            showNotification();  // No need to request permission for lower API levels
+            showNotification();
         }
     }
 
     private void showNotification() {
         Intent intent = new Intent(this, SleepActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra("fromNotification", true);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.logo_timer)  // Replace with your own icon
+                .setSmallIcon(R.drawable.logo_timer)
                 .setContentTitle("Sleep Timer")
                 .setContentText("Timer is running")
                 .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -212,7 +278,7 @@ public class SleepActivity extends AppCompatActivity {
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.logo_timer)  // Replace with your own icon
+                .setSmallIcon(R.drawable.logo_timer)
                 .setContentTitle("Sleep Timer")
                 .setContentText(String.format(Locale.getDefault(), "%02d:%02d:%02d:%03d", hours, minutes, seconds, milliSeconds))
                 .setPriority(NotificationCompat.PRIORITY_LOW)
@@ -230,21 +296,19 @@ public class SleepActivity extends AppCompatActivity {
     private void removeNotification() {
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         notificationManager.cancel(NOTIFICATION_ID);
+
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                showNotification();
-            } else {
-                Toast.makeText(this, "Please enable the notification permission", Toast.LENGTH_SHORT).show();
-            }
-        }
+    private void stopAllServices() {
+        // Stop any services related to this activity
+        Intent intent = new Intent(this, SleepActivity.class); // Replace with your actual service class
+        stopService(intent);
     }
 
     private void updateTextView() {
-        textView.setText(MessageFormat.format("{0}:{1}:{2}:{3}", hours, String.format(Locale.getDefault(), "%02d", minutes), String.format(Locale.getDefault(), "%02d", seconds), String.format(Locale.getDefault(), "%03d", milliSeconds)));
+        textView.setText(MessageFormat.format("{0}:{1}:{2}:{3}", hours,
+                String.format(Locale.getDefault(), "%02d", minutes),
+                String.format(Locale.getDefault(), "%02d", seconds),
+                String.format(Locale.getDefault(), "%03d", milliSeconds)));
     }
 }

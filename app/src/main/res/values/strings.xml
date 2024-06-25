@@ -8,4 +8,6 @@
     <string name="community">Community</string>
     <string name="sleep">Sleep</string>
     <string name="reset">reset</string>
+    <string name="journal">Journal</string>
+    <string name="quotes">Quotes\n</string>
 </resources>

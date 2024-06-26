@@ -13,7 +13,7 @@ import androidx.core.view.WindowInsetsCompat;
 import com.example.calmify.R;
 
 public class SplashActivity extends AppCompatActivity {
-    private static final int SPLASH_DURATION = 3;
+    private static final int SPLASH_DURATION = 3000;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,7 +23,7 @@ public class SplashActivity extends AppCompatActivity {
             @Override
             public void run() {
                 // Start the main activity after the splash screen duration
-                Intent intent = new Intent(SplashActivity.this, SignUpActivity.class);
+                Intent intent = new Intent(SplashActivity.this, SignInActivity.class);
                 startActivity(intent);
                 finish();
             }

@@ -25,34 +25,37 @@ import java.util.Objects;
 
 public class SignInActivity extends AppCompatActivity {
 
-    ImageView goToSignUp;
+
     private EditText editTextEmail;
     private EditText editTextPassword;
     private Button signInButton;
     private FirebaseAuth firebaseAuth;
     private Intent intent;
+    ImageView goToSignUp;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_sign_in);
         firebaseAuth = FirebaseAuth.getInstance();
-        signInButton = findViewById(R.id.signInButton);
-        editTextEmail = findViewById(R.id.editTextEmailSignIn);
-        editTextPassword = findViewById(R.id.editTextPasswordSignIn);
-        goToSignUp = findViewById(R.id.imageView3);
         intent = new Intent(SignInActivity.this, MainActivity.class);
         if(firebaseAuth.getCurrentUser() != null){
             startActivity(intent);
             finish();
         }
-        super.onCreate(savedInstanceState);
+
+        signInButton = findViewById(R.id.signInButton);
+        editTextEmail = findViewById(R.id.editTextEmailSignIn);
+        editTextPassword = findViewById(R.id.editTextPasswordSignIn);
+        goToSignUp = findViewById(R.id.imageView3);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_sign_in);
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
 
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            goToSignUp.setOnClickListener(new View.OnClickListener() {
+        goToSignUp.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(SignInActivity.this, SignUpActivity.class);

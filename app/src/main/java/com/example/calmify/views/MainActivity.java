@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.calmify.R;
+import com.example.calmify.views.fragments.ActivityFragment;
 import com.example.calmify.views.fragments.HomeFragment;
 import com.example.calmify.views.fragments.InProgressFragment;
 import com.example.calmify.views.fragments.MeditateFragment;
@@ -47,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
                 } else if (itemId == R.id.navigation_meditate) {
                     selectedFragment = new MeditateFragment();
                 } else if (itemId == R.id.navigation_activity) {
-                    selectedFragment = new InProgressFragment();
+                    selectedFragment = new ActivityFragment();
                 } else if (itemId == R.id.navigation_community) {
                     selectedFragment = new InProgressFragment();
                 }else{

@@ -1,16 +1,5 @@
 package com.example.calmify.views.fragments;
 
-import static android.app.Activity.RESULT_OK;
-import static android.content.ContentValues.TAG;
-
-import android.content.Intent;
-import android.media.MediaPlayer;
-import android.net.Uri;
-import android.os.Bundle;
-
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.Fragment;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -26,67 +15,32 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import com.example.calmify.R;
+import androidx.fragment.app.Fragment;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link MeditateFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import com.example.calmify.R;
+import com.example.calmify.views.adapter.MeditationSession;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class MeditateFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public MeditateFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MeditateFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MeditateFragment newInstance(String param1, String param2) {
-        MeditateFragment fragment = new MeditateFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
-    private static final int REQUEST_CODE_PICK_AUDIO = 1;
-    private static final int PERMISSION_REQUEST_READ_MEDIA_AUDIO = 2;
     private static final String KEY_TIME_LEFT_IN_MILLIS = "timeLeftInMillis";
     private static final String KEY_IS_TIMER_RUNNING = "isTimerRunning";
     private static final String KEY_MUSIC_URI = "musicUri";
+    private static final int REQUEST_CODE_PICK_AUDIO = 1;
     private static final int PERMISSION_REQUEST_READ_EXTERNAL_STORAGE = 2;
     private static final String TAG = "MeditateFragment";
+
     private TextView timerTextView;
     private EditText minutesEditText, secondsEditText;
     private boolean isTimerRunning;
@@ -95,6 +49,8 @@ public class MeditateFragment extends Fragment {
     private long timeLeftInMillis;
     private MediaPlayer mediaPlayer;
     private Uri musicUri;
+    private FirebaseAuth firebaseAuth;
+    private DatabaseReference databaseReference;
 
     @Nullable
     @Override
@@ -108,29 +64,13 @@ public class MeditateFragment extends Fragment {
         resetButton = view.findViewById(R.id.resetButton);
         chooseMusicButton = view.findViewById(R.id.chooseMusicButton);
 
-
-        startButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startTimer();
-            }
-        });
-
-        resetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                resetTimer();
-            }
-        });
-
-        chooseMusicButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                chooseMusic();
-            }
-        });
+        startButton.setOnClickListener(v -> startTimer());
+        resetButton.setOnClickListener(v -> resetTimer());
+        chooseMusicButton.setOnClickListener(v -> chooseMusic());
 
         mediaPlayer = new MediaPlayer();
+        firebaseAuth = FirebaseAuth.getInstance();
+        databaseReference = FirebaseDatabase.getInstance().getReference("meditations").child(firebaseAuth.getCurrentUser().getUid());
 
         if (savedInstanceState != null) {
             timeLeftInMillis = savedInstanceState.getLong(KEY_TIME_LEFT_IN_MILLIS);
@@ -148,7 +88,6 @@ public class MeditateFragment extends Fragment {
     }
 
     private void startTimer() {
-        // Validate and parse minutes and seconds
         int minutes = 0;
         int seconds = 0;
         try {
@@ -162,8 +101,15 @@ public class MeditateFragment extends Fragment {
             secondsEditText.setText("0");
         }
 
+        if (minutes == 0 && seconds == 0) {
+            Toast.makeText(getContext(), "Please enter a valid time.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         timeLeftInMillis = (minutes * 60 + seconds) * 1000;
 
+        int finalMinutes = minutes;
+        int finalSeconds = seconds;
         countDownTimer = new CountDownTimer(timeLeftInMillis, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -175,6 +121,7 @@ public class MeditateFragment extends Fragment {
             public void onFinish() {
                 timerTextView.setText("00:00:00");
                 stopMusic();
+                saveSession((finalMinutes * 60 + finalSeconds) * 1000); // Save the initial set duration
             }
         }.start();
 
@@ -206,33 +153,26 @@ public class MeditateFragment extends Fragment {
     }
 
     private void chooseMusic() {
-        Log.d(TAG, "chooseMusic: Button pressed");
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "chooseMusic: Requesting permission");
             ActivityCompat.requestPermissions(requireActivity(),
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_READ_EXTERNAL_STORAGE);
         } else {
-            Log.d(TAG, "chooseMusic: Permission already granted");
             pickAudio();
         }
     }
 
     private void pickAudio() {
-        Log.d(TAG, "pickAudio: Launching intent to pick audio");
         Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Audio.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, REQUEST_CODE_PICK_AUDIO);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Log.d(TAG, "onRequestPermissionsResult: Received result");
         if (requestCode == PERMISSION_REQUEST_READ_EXTERNAL_STORAGE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d(TAG, "onRequestPermissionsResult: Permission granted");
                 pickAudio();
             } else {
-                Log.d(TAG, "onRequestPermissionsResult: Permission denied");
                 Toast.makeText(getContext(), "Permission denied to read external storage", Toast.LENGTH_SHORT).show();
             }
         }
@@ -243,7 +183,6 @@ public class MeditateFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_PICK_AUDIO && resultCode == getActivity().RESULT_OK && data != null) {
-            Log.d(TAG, "onActivityResult: Audio selected");
             musicUri = data.getData();
             Toast.makeText(getContext(), "Music selected!", Toast.LENGTH_SHORT).show();
         }
@@ -264,6 +203,14 @@ public class MeditateFragment extends Fragment {
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
         }
+    }
+
+    private void saveSession(long duration) {
+        long timestamp = System.currentTimeMillis();
+        MeditationSession session = new MeditationSession(timestamp, duration);
+        databaseReference.push().setValue(session)
+                .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Session saved!", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Log.e(TAG, "Failed to save session", e));
     }
 
     @Override

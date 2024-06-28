@@ -1,14 +1,34 @@
 package com.example.calmify.views.fragments;
 
+import static android.content.ContentValues.TAG;
+
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.calmify.R;
+import com.example.calmify.views.adapter.MeditationSession;
+import com.example.calmify.views.adapter.MeditationSessionAdapter;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -16,6 +36,14 @@ import com.example.calmify.R;
  * create an instance of this fragment.
  */
 public class ActivityFragment extends Fragment {
+
+
+    private RecyclerView recyclerView;
+    private MeditationSessionAdapter adapter;
+    private List<MeditationSession> sessionList;
+
+    private FirebaseAuth firebaseAuth;
+    private DatabaseReference databaseReference;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -58,9 +86,50 @@ public class ActivityFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_activity, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_activity, container, false);
+
+        recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        sessionList = new ArrayList<>();
+        adapter = new MeditationSessionAdapter(sessionList);
+        recyclerView.setAdapter(adapter);
+
+        firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+
+        if (currentUser != null) {
+            databaseReference = FirebaseDatabase.getInstance().getReference("meditations").child(currentUser.getUid());
+            fetchMeditationSessions();
+        } else {
+            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
+        }
+
+        return view;
     }
+
+
+    private void fetchMeditationSessions() {
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                sessionList.clear();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    MeditationSession session = snapshot.getValue(MeditationSession.class);
+                    if (session != null) {
+                        Log.d(TAG, "Retrieved session with duration: " + session.getDuration()); // Add this log
+                        sessionList.add(session);
+                    }
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e(TAG, "Failed to read sessions", databaseError.toException());
+            }
+        });
+    }
+
 }

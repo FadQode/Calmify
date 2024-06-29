@@ -207,7 +207,7 @@ public class MeditateFragment extends Fragment {
 
     private void saveSession(long duration) {
         long timestamp = System.currentTimeMillis();
-        MeditationSession session = new MeditationSession(timestamp, duration);
+        MeditationSession session = new MeditationSession(duration, timestamp);
         databaseReference.push().setValue(session)
                 .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Session saved!", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> Log.e(TAG, "Failed to save session", e));

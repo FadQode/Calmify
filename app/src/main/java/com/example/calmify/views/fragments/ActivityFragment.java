@@ -14,6 +14,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.calmify.R;
@@ -38,12 +41,14 @@ import java.util.List;
 public class ActivityFragment extends Fragment {
 
 
-    private RecyclerView recyclerView;
-    private MeditationSessionAdapter adapter;
-    private List<MeditationSession> sessionList;
-
+    private TextView totalSessionsTextView;
+    private TextView totalTimeTextView;
+    private ListView sessionsListView;
     private FirebaseAuth firebaseAuth;
     private DatabaseReference databaseReference;
+    private List<MeditationSession> sessionsList;
+    private ArrayAdapter<MeditationSession> sessionsAdapter;
+
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -85,51 +90,59 @@ public class ActivityFragment extends Fragment {
         }
     }
 
+    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_activity, container, false);
 
-        recyclerView = view.findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        sessionList = new ArrayList<>();
-        adapter = new MeditationSessionAdapter(sessionList);
-        recyclerView.setAdapter(adapter);
+        totalSessionsTextView = view.findViewById(R.id.totalSessionsTextView);
+        totalTimeTextView = view.findViewById(R.id.totalTimeTextView);
+        sessionsListView = view.findViewById(R.id.sessionsListView);
 
         firebaseAuth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = firebaseAuth.getCurrentUser();
+        databaseReference = FirebaseDatabase.getInstance().getReference("meditations").child(firebaseAuth.getCurrentUser().getUid());
 
-        if (currentUser != null) {
-            databaseReference = FirebaseDatabase.getInstance().getReference("meditations").child(currentUser.getUid());
-            fetchMeditationSessions();
-        } else {
-            Toast.makeText(getContext(), "User not logged in", Toast.LENGTH_SHORT).show();
-        }
+        sessionsList = new ArrayList<>();
+        sessionsAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, sessionsList);
+        sessionsListView.setAdapter(sessionsAdapter);
+
+        loadMeditationSessions();
 
         return view;
     }
 
-
-    private void fetchMeditationSessions() {
+    private void loadMeditationSessions() {
         databaseReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                sessionList.clear();
+                sessionsList.clear();
+                long totalTime = 0;
+
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     MeditationSession session = snapshot.getValue(MeditationSession.class);
                     if (session != null) {
-                        Log.d(TAG, "Retrieved session with duration: " + session.getDuration()); // Add this log
-                        sessionList.add(session);
+                        sessionsList.add(session);
+                        totalTime += session.getDuration();
                     }
                 }
-                adapter.notifyDataSetChanged();
+
+                sessionsAdapter.notifyDataSetChanged();
+
+                totalSessionsTextView.setText("Total Sessions: " + sessionsList.size());
+                totalTimeTextView.setText("Total Time: " + formatDuration(totalTime));
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.e(TAG, "Failed to read sessions", databaseError.toException());
+                Log.e("ActivityFragment", "Failed to load sessions", databaseError.toException());
             }
         });
     }
 
+    private String formatDuration(long durationMillis) {
+        int seconds = (int) (durationMillis / 1000) % 60;
+        int minutes = (int) ((durationMillis / 1000) / 60) % 60;
+        int hours = (int) ((durationMillis / 1000) / 3600);
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+    }
 }

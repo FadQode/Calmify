@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
                 } else if (itemId == R.id.navigation_community) {
                     selectedFragment = new InProgressFragment();
                 }else{
+                    selectedFragment = new HomeFragment();
                     Log.d(TAG, "onNavigationItemSelected: "+ itemId);
                 }
 

@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.calmify.R;
+import com.example.calmify.model.MeditationSession;
 
 import java.util.Date;
 import java.util.List;

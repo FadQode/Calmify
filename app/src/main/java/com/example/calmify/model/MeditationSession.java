@@ -1,4 +1,4 @@
-package com.example.calmify.views.adapter;
+package com.example.calmify.model;
 
 
 import java.text.SimpleDateFormat;

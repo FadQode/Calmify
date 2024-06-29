@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.example.calmify.R;
 import com.example.calmify.views.MainActivity;
+import com.example.calmify.views.QuoteActivity;
 import com.example.calmify.views.SignInActivity;
 import com.example.calmify.views.SignUpActivity;
 import com.example.calmify.views.SleepActivity;
@@ -75,12 +76,20 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home,container, false);
         // Inflate the layout for this fragment
         ImageView sleepLogo;
+        ImageView quotesLogo;
 
         sleepLogo = view.findViewById(R.id.sleepLogo);
+        quotesLogo = view.findViewById(R.id.quoteLogo);
 
         sleepLogo.setOnClickListener(v -> {
 
             Intent intent = new Intent(getActivity(), SleepActivity.class);
+            startActivity(intent);
+        });
+
+        quotesLogo.setOnClickListener(v -> {
+
+            Intent intent =new Intent(getActivity(), QuoteActivity.class);
             startActivity(intent);
         });
         return view;
